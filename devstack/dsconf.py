@@ -173,3 +173,41 @@ class LocalConf(object):
         with open(target, "a+") as f:
             for line in self._section("local", "localrc"):
                 f.write(line)
+
+    def _at_insert_point_local(self, name, func):
+        temp = tempfile.NamedTemporaryFile(mode='r')
+        shutil.copyfile(self.fname, temp.name)
+        in_meta = False
+        done = False
+        with open(self.fname, "w+") as writer:
+            with open(temp.name) as reader:
+                for line in reader.readlines():
+                    if done:
+                        writer.write(line)
+                        continue
+
+                    if re.match(re.escape("[[local|localrc]]"), line):
+                        in_meta = True
+                        writer.write(line)
+                    elif re.match("\[\[.*\|.*\]\]", line):
+                        # if we're not done yet, we
+                        if in_meta:
+                            func(writer, None)
+                            writer.write(line)
+                            done = True
+                        in_meta = False
+                        continue
+                    elif re.match("\s*%s\s*\=" % re.escape(name), line):
+                        # we found our key, pass to the writer func
+                        func(writer, line)
+                        done = True
+                    else:
+                        # write out whatever we find
+                        writer.write(line)
+            if not done:
+                func(writer, None)
+
+    def set_local(self, name, value):
+        def _do_set(writer, line):
+            writer.write("%s = %s\n" % (name, value))
+        self._at_insert_point_local(name, _do_set)
