@@ -16,6 +16,7 @@
 # python ConfigFile parser because that ends up rewriting the entire
 # file and doesn't ensure comments remain.
 
+import os.path
 import re
 import shutil
 import tempfile
@@ -31,7 +32,10 @@ class IniFile(object):
         """Returns True if section has a key that is name"""
 
         current_section = ""
-        with open(self.fname) as reader:
+        if not os.path.exists(self.fname):
+            return False
+
+        with open(self.fname, "r+") as reader:
             for line in reader.readlines():
                 m = re.match("\[([^\[\]]+)\]", line)
                 if m:
@@ -41,7 +45,6 @@ class IniFile(object):
                         return True
         return False
 
-
     def add(self, section, name, value):
         """add a key / value to an ini file in a section.
 
@@ -50,26 +53,38 @@ class IniFile(object):
         will be added to the end of the file.
         """
         temp = tempfile.NamedTemporaryFile(mode='r')
-        shutil.copyfile(self.fname, temp.name)
+        if os.path.exists(self.fname):
+            shutil.copyfile(self.fname, temp.name)
+        else:
+            with open(temp.name, "w+"):
+                pass
+
         found = False
-        with open(temp.name) as reader:
-            with open(self.fname, "w") as writer:
+        with open(self.fname, "w+") as writer:
+            with open(temp.name) as reader:
                 for line in reader.readlines():
                     writer.write(line)
                     m = re.match("\[([^\[\]]+)\]", line)
                     if m and m.group(1) == section:
                         found = True
                         writer.write("%s = %s\n" % (name, value))
-                if not found:
-                    writer.write("[%s]\n" % section)
-                    writer.write("%s = %s\n" % (name, value))
+            if not found:
+                writer.write("[%s]\n" % section)
+                writer.write("%s = %s\n" % (name, value))
 
     def _at_existing_key(self, section, name, func, match="%s\s*\="):
+        """Run a function at a found key.
+
+        NOTE(sdague): if the file isn't found, we end up
+        exploding. This seems like the right behavior in nearly all
+        circumstances.
+
+        """
         temp = tempfile.NamedTemporaryFile(mode='r')
         shutil.copyfile(self.fname, temp.name)
         current_section = ""
         with open(temp.name) as reader:
-            with open(self.fname, "w") as writer:
+            with open(self.fname, "w+") as writer:
                 for line in reader.readlines():
                     m = re.match("\[([^\[\]]+)\]", line)
                     if m:
@@ -83,14 +98,12 @@ class IniFile(object):
                     else:
                         writer.write(line)
 
-
     def remove(self, section, name):
         """remove a key / value from an ini file in a section."""
         def _do_remove(writer, line):
             pass
 
         self._at_existing_key(section, name, _do_remove)
-
 
     def comment(self, section, name):
         def _do_comment(writer, line):
@@ -112,3 +125,42 @@ class IniFile(object):
             self._at_existing_key(section, name, _do_set)
         else:
             self.add(section, name, value)
+
+
+class LocalConf(object):
+    """Class for manipulating local.conf files in place."""
+
+    def __init__(self, fname):
+        self.fname = fname
+
+    def _conf(self, group, conf):
+        in_section = False
+        current_section = ""
+        with open(self.fname) as reader:
+            for line in reader.readlines():
+                if re.match(r"\[\[%s\|%s\]\]" % (
+                        re.escape(group),
+                        re.escape(conf)),
+                        line):
+                    in_section = True
+                    continue
+                # any other meta section means we aren't in the
+                # section we want to be.
+                elif re.match("\[\[.*\|.*\]\]", line):
+                    in_section = False
+                    continue
+
+                if in_section:
+                    m = re.match("\[([^\[\]]+)\]", line)
+                    if m:
+                        current_section = m.group(1)
+                        continue
+                    else:
+                        m2 = re.match(r"(\w+)\s*\=\s*(.+)", line)
+                        if m2:
+                            yield current_section, m2.group(1), m2.group(2)
+
+    def extract(self, group, conf, target):
+        ini_file = IniFile(target)
+        for section, name, value in self._conf(group, conf):
+            ini_file.set(section, name, value)

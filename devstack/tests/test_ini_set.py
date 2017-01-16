@@ -110,3 +110,22 @@ class TestIniSet(testtools.TestCase):
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT4)
+
+
+class TestIniCreate(testtools.TestCase):
+
+    def setUp(self):
+        super(TestIniCreate, self).setUp()
+        self._path = self.useFixture(fixtures.TempDir()).path
+        self._path += "/test.ini"
+
+    def test_add_items(self):
+        conf = dsconf.IniFile(self._path)
+        conf.set("default", "c", "d")
+        conf.set("default", "a", "b")
+        conf.set("second", "g", "h")
+        conf.set("second", "e", "f")
+        conf.set("new", "s", "t")
+        with open(self._path) as f:
+            content = f.read()
+            self.assertEqual(BASIC, content)
