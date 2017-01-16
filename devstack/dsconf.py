@@ -211,3 +211,62 @@ class LocalConf(object):
         def _do_set(writer, line):
             writer.write("%s = %s\n" % (name, value))
         self._at_insert_point_local(name, _do_set)
+
+    def _at_insert_point(self, group, conf, section, name, func):
+        temp = tempfile.NamedTemporaryFile(mode='r')
+        shutil.copyfile(self.fname, temp.name)
+        in_meta = False
+        in_section = False
+        done = False
+        with open(self.fname, "w+") as writer:
+            with open(temp.name) as reader:
+                for line in reader.readlines():
+                    if done:
+                        writer.write(line)
+                        continue
+
+                    if re.match(re.escape("[[%s|%s]]" % (group, conf)), line):
+                        in_meta = True
+                        writer.write(line)
+                    elif re.match("\[\[.*\|.*\]\]", line):
+                        # if we're not done yet, we
+                        if in_meta:
+                            if not in_section:
+                                # if we've not found the section yet,
+                                # write out section as well.
+                                writer.write("[%s]\n" % section)
+                            func(writer, None)
+                            done = True
+                        writer.write(line)
+                        in_meta = False
+                        in_section = False
+                    elif re.match(re.escape("[%s]" % section), line):
+                        # we found a relevant section
+                        writer.write(line)
+                        in_section = True
+                    elif re.match("\[[^\[\]]+\]", line):
+                        if in_meta and in_section:
+                            # We've ended our section, in our meta,
+                            # never found the key. Time to add it.
+                            func(writer, None)
+                            done = True
+                        in_section = False
+                        writer.write(line)
+                    elif (in_meta and in_section and
+                          re.match("\s*%s\s*\=" % re.escape(name), line)):
+                        # we found our match point
+                        func(writer, line)
+                        done = True
+                    else:
+                        # write out whatever we find
+                        writer.write(line)
+            if not done:
+                # we never found meta with a relevant section
+                writer.write("[[%s|%s]]\n" % (group, conf))
+                writer.write("[%s]\n" % (section))
+                func(writer, None)
+
+    def set(self, group, conf, section, name, value):
+        def _do_set(writer, line):
+            writer.write("%s = %s\n" % (name, value))
+        self._at_insert_point(group, conf, section, name, _do_set)
