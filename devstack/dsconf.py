@@ -64,7 +64,7 @@ class IniFile(object):
                     writer.write("[%s]\n" % section)
                     writer.write("%s = %s\n" % (name, value))
 
-    def _at_existing_key(self, section, name, func):
+    def _at_existing_key(self, section, name, func, match="%s\s*\="):
         temp = tempfile.NamedTemporaryFile(mode='r')
         shutil.copyfile(self.fname, temp.name)
         current_section = ""
@@ -75,7 +75,7 @@ class IniFile(object):
                     if m:
                         current_section = m.group(1)
                     if current_section == section:
-                        if re.match("%s\s*\=" % name, line):
+                        if re.match(match % name, line):
                             # run function with writer and found line
                             func(writer, line)
                         else:
@@ -97,6 +97,12 @@ class IniFile(object):
             writer.write("# %s" % line)
 
         self._at_existing_key(section, name, _do_comment)
+
+    def uncomment(self, section, name):
+        def _do_uncomment(writer, line):
+            writer.write(re.sub("^#\s*", "", line))
+
+        self._at_existing_key(section, name, _do_uncomment, match="#\s*%s\s*\=")
 
     def set(self, section, name, value):
         def _do_set(writer, line):
