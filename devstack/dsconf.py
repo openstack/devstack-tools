@@ -102,7 +102,8 @@ class IniFile(object):
         def _do_uncomment(writer, line):
             writer.write(re.sub("^#\s*", "", line))
 
-        self._at_existing_key(section, name, _do_uncomment, match="#\s*%s\s*\=")
+        self._at_existing_key(section, name, _do_uncomment,
+                              match="#\s*%s\s*\=")
 
     def set(self, section, name, value):
         def _do_set(writer, line):
