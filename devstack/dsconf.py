@@ -27,6 +27,21 @@ class IniFile(object):
     def __init__(self, fname):
         self.fname = fname
 
+    def has(self, section, name):
+        """Returns True if section has a key that is name"""
+
+        current_section = ""
+        with open(self.fname) as reader:
+            for line in reader.readlines():
+                m = re.match("\[([^\[\]]+)\]", line)
+                if m:
+                    current_section = m.group(1)
+                if current_section == section:
+                    if re.match("%s\s*\=" % name, line):
+                        return True
+        return False
+
+
     def add(self, section, name, value):
         """add a key / value to an ini file in a section.
 
@@ -49,9 +64,7 @@ class IniFile(object):
                     writer.write("[%s]\n" % section)
                     writer.write("%s = %s\n" % (name, value))
 
-    def remove(self, section, name):
-        """remove a key / value from an ini file in a section."""
-
+    def _at_existing_key(self, section, name, func):
         temp = tempfile.NamedTemporaryFile(mode='r')
         shutil.copyfile(self.fname, temp.name)
         current_section = ""
@@ -63,8 +76,32 @@ class IniFile(object):
                         current_section = m.group(1)
                     if current_section == section:
                         if re.match("%s\s*\=" % name, line):
-                            continue
+                            # run function with writer and found line
+                            func(writer, line)
                         else:
                             writer.write(line)
                     else:
                         writer.write(line)
+
+
+    def remove(self, section, name):
+        """remove a key / value from an ini file in a section."""
+        def _do_remove(writer, line):
+            pass
+
+        self._at_existing_key(section, name, _do_remove)
+
+
+    def comment(self, section, name):
+        def _do_comment(writer, line):
+            writer.write("# %s" % line)
+
+        self._at_existing_key(section, name, _do_comment)
+
+    def set(self, section, name, value):
+        def _do_set(writer, line):
+            writer.write("%s = %s\n" % (name, value))
+        if self.has(section, name):
+            self._at_existing_key(section, name, _do_set)
+        else:
+            self.add(section, name, value)
