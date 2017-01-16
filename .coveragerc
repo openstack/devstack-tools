@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = devstack
+
+[report]
+ignore_errors = True
