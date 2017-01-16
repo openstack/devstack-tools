@@ -44,6 +44,25 @@ NEUTRON = """[DEFAULT]
 global_physnet_mtu = 1450
 """
 
+NEUTRON_BASE = """[DEFAULT]
+api_workers = 2
+"""
+
+NEUTRON_BASE_RES = """[DEFAULT]
+global_physnet_mtu = 1450
+api_workers = 2
+"""
+
+NEUTRON_BASE2 = """[DEFAULT]
+api_workers = 2
+global_physnet_mtu = 1400
+"""
+
+NEUTRON_BASE2_RES = """[DEFAULT]
+api_workers = 2
+global_physnet_mtu = 1450
+"""
+
 
 class TestLcExtract(testtools.TestCase):
 
@@ -69,3 +88,29 @@ class TestLcExtract(testtools.TestCase):
         with open(nova) as f:
             content = f.read()
             self.assertEqual(content, NOVA)
+
+    def test_extract_neutron_merge_add(self):
+        dirname = self.useFixture(fixtures.TempDir()).path
+        neutron = os.path.join(dirname, "neutron.conf")
+        with open(neutron, "w+") as f:
+            f.write(NEUTRON_BASE)
+
+        conf = dsconf.LocalConf(self._path)
+        conf.extract("post-config", "$NEUTRON_CONF", neutron)
+
+        with open(neutron) as f:
+            content = f.read()
+            self.assertEqual(content, NEUTRON_BASE_RES)
+
+    def test_extract_neutron_merge_set(self):
+        dirname = self.useFixture(fixtures.TempDir()).path
+        neutron = os.path.join(dirname, "neutron.conf")
+        with open(neutron, "w+") as f:
+            f.write(NEUTRON_BASE2)
+
+        conf = dsconf.LocalConf(self._path)
+        conf.extract("post-config", "$NEUTRON_CONF", neutron)
+
+        with open(neutron) as f:
+            content = f.read()
+            self.assertEqual(content, NEUTRON_BASE2_RES)
