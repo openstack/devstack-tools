@@ -17,7 +17,6 @@
 # file and doesn't ensure comments remain.
 
 import fixtures
-import os.path
 import testtools
 
 from devstack import dsconf
