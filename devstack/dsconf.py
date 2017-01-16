@@ -134,8 +134,20 @@ class LocalConf(object):
         self.fname = fname
 
     def _conf(self, group, conf):
-        in_section = False
         current_section = ""
+        for line in self._section(group, conf):
+            m = re.match("\[([^\[\]]+)\]", line)
+            if m:
+                current_section = m.group(1)
+                continue
+            else:
+                m2 = re.match(r"(\w+)\s*\=\s*(.+)", line)
+                if m2:
+                    yield current_section, m2.group(1), m2.group(2)
+
+    def _section(self, group, conf):
+        """Yield all the lines out of a meta section."""
+        in_section = False
         with open(self.fname) as reader:
             for line in reader.readlines():
                 if re.match(r"\[\[%s\|%s\]\]" % (
@@ -149,18 +161,15 @@ class LocalConf(object):
                 elif re.match("\[\[.*\|.*\]\]", line):
                     in_section = False
                     continue
-
                 if in_section:
-                    m = re.match("\[([^\[\]]+)\]", line)
-                    if m:
-                        current_section = m.group(1)
-                        continue
-                    else:
-                        m2 = re.match(r"(\w+)\s*\=\s*(.+)", line)
-                        if m2:
-                            yield current_section, m2.group(1), m2.group(2)
+                    yield line
 
     def extract(self, group, conf, target):
         ini_file = IniFile(target)
         for section, name, value in self._conf(group, conf):
             ini_file.set(section, name, value)
+
+    def extract_localrc(self, target):
+        with open(target, "a+") as f:
+            for line in self._section("local", "localrc"):
+                f.write(line)

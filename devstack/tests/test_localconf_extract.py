@@ -36,6 +36,17 @@ global_physnet_mtu=1450
 compute = auto
 """
 
+LOCALRC = """a = 1
+c = b
+"""
+
+LOCALRC_RES = """a = 1
+c = b
+a = b
+c = d
+f = 1
+"""
+
 NOVA = """[upgrade_levels]
 compute = auto
 """
@@ -114,3 +125,16 @@ class TestLcExtract(testtools.TestCase):
         with open(neutron) as f:
             content = f.read()
             self.assertEqual(content, NEUTRON_BASE2_RES)
+
+    def test_extract_localrc(self):
+        dirname = self.useFixture(fixtures.TempDir()).path
+        localrc = os.path.join(dirname, "localrc")
+        with open(localrc, "w+") as f:
+            f.write(LOCALRC)
+
+        conf = dsconf.LocalConf(self._path)
+        conf.extract_localrc(localrc)
+
+        with open(localrc) as f:
+            content = f.read()
+            self.assertEqual(content, LOCALRC_RES)
