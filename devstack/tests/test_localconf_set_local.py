@@ -24,9 +24,9 @@ from devstack import dsconf
 
 BASIC = """
 [[local|localrc]]
-a = b
-c = d
-f = 1
+a=b
+c=d
+f=1
 [[post-config|$NEUTRON_CONF]]
 [DEFAULT]
 global_physnet_mtu=1450
@@ -37,10 +37,10 @@ compute = auto
 
 RESULT1 = """
 [[local|localrc]]
-a = b
-c = d
-f = 1
-g = 2
+a=b
+c=d
+f=1
+g=2
 [[post-config|$NEUTRON_CONF]]
 [DEFAULT]
 global_physnet_mtu=1450
@@ -51,9 +51,9 @@ compute = auto
 
 RESULT2 = """
 [[local|localrc]]
-a = 2
-c = d
-f = 1
+a=2
+c=d
+f=1
 [[post-config|$NEUTRON_CONF]]
 [DEFAULT]
 global_physnet_mtu=1450

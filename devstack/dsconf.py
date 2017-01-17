@@ -222,11 +222,11 @@ class LocalConf(object):
         if not os.path.exists(self.fname):
             with open(self.fname, "w+") as writer:
                 writer.write("[[local|localrc]]\n")
-                writer.write("%s = %s\n" % (name, value))
+                writer.write("%s=%s\n" % (name, value))
                 return
 
         def _do_set(writer, line):
-            writer.write("%s = %s\n" % (name, value))
+            writer.write("%s=%s\n" % (name, value))
         self._at_insert_point_local(name, _do_set)
 
     def _at_insert_point(self, group, conf, section, name, func):
