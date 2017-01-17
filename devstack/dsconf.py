@@ -304,6 +304,8 @@ class LocalConf(object):
                     m = re.match(r"(\w+)\s*\=\s*(.+)", line)
                     if m:
                         self.set_local(m.group(1), m.group(2))
+                    else:
+                        print("SKIPPING ``%s`` from '%s'" % (line.lstrip(), lcfile))
             else:
                 for section, name, value in lc._conf(group, conf):
                     self.set(group, conf, section, name, value)
