@@ -306,4 +306,4 @@ class LocalConf(object):
                         self.set_local(m.group(1), m.group(2))
             else:
                 for section, name, value in lc._conf(group, conf):
-                    lc.set(group, conf, section, name, value)
+                    self.set(group, conf, section, name, value)
