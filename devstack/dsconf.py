@@ -208,6 +208,12 @@ class LocalConf(object):
                 func(writer, None)
 
     def set_local(self, name, value):
+        if not os.path.exists(self.fname):
+            with open(self.fname, "w+") as writer:
+                writer.write("[[local|localrc]]\n")
+                writer.write("%s = %s\n" % (name, value))
+                return
+
         def _do_set(writer, line):
             writer.write("%s = %s\n" % (name, value))
         self._at_insert_point_local(name, _do_set)
@@ -267,6 +273,13 @@ class LocalConf(object):
                 func(writer, None)
 
     def set(self, group, conf, section, name, value):
+        if not os.path.exists(self.fname):
+            with open(self.fname, "w+") as writer:
+                writer.write("[[%s|%s]]\n" % (group, conf))
+                writer.write("[%s]\n" % section)
+                writer.write("%s = %s\n" % (name, value))
+                return
+
         def _do_set(writer, line):
             writer.write("%s = %s\n" % (name, value))
         self._at_insert_point(group, conf, section, name, _do_set)
