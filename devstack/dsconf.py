@@ -145,6 +145,17 @@ class LocalConf(object):
                 if m2:
                     yield current_section, m2.group(1), m2.group(2)
 
+    def groups(self):
+        """Return a list of all groups in the local.conf"""
+        groups = []
+        with open(self.fname) as reader:
+            for line in reader.readlines():
+                m = re.match(r"\[\[([^\[\]]+)\|([^\[\]]+)\]\]", line)
+                if m:
+                    group = (m.group(1), m.group(2))
+                    groups.append(group)
+        return groups
+
     def _section(self, group, conf):
         """Yield all the lines out of a meta section."""
         in_section = False
@@ -283,3 +294,16 @@ class LocalConf(object):
         def _do_set(writer, line):
             writer.write("%s = %s\n" % (name, value))
         self._at_insert_point(group, conf, section, name, _do_set)
+
+    def merge_lc(self, lcfile):
+        lc = LocalConf(lcfile)
+        groups = lc.groups()
+        for group, conf in groups:
+            if group == "local":
+                for line in lc._section(group, conf):
+                    m = re.match(r"(\w+)\s*\=\s*(.+)", line)
+                    if m:
+                        self.set_local(m.group(1), m.group(2))
+            else:
+                for section, name, value in lc._conf(group, conf):
+                    lc.set(group, conf, section, name, value)

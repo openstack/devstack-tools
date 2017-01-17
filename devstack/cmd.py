@@ -50,6 +50,11 @@ def setlc_conf(local_conf, args):
     local_conf.set(args.group, args.conf, args.section, args.name, args.value)
 
 
+def merge(local_conf, args):
+    for source in args.sources:
+        local_conf.merge_lc(source)
+
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(prog='dsconf')
     subparsers = parser.add_subparsers(title='commands',
@@ -120,14 +125,25 @@ def parse_args(argv):
     parser_setlc_conf.add_argument('name')
     parser_setlc_conf.add_argument('value')
 
-    return parser.parse_args()
+    parser_merge = subparsers.add_parser(
+        'merge_lc', help='merge local.conf files')
+    parser_merge.set_defaults(func=merge)
+    parser_merge.add_argument('local_conf')
+    parser_merge.add_argument('sources', nargs='+')
+
+    return parser.parse_args(), parser
 
 
 def main(argv=None):
-    args = parse_args(argv or sys.argv)
+    args, parser = parse_args(argv or sys.argv)
     if hasattr(args, 'inifile'):
         f = devstack.dsconf.IniFile(args.inifile)
     elif hasattr(args, 'local_conf'):
         f = devstack.dsconf.LocalConf(args.local_conf)
-    args.func(f, args)
+
+    if hasattr(args, 'func'):
+        args.func(f, args)
+    else:
+        parser.print_help()
+        return 1
     return
