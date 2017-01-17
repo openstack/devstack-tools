@@ -229,6 +229,17 @@ class LocalConf(object):
             writer.write("%s=%s\n" % (name, value))
         self._at_insert_point_local(name, _do_set)
 
+    def set_local_raw(self, line):
+        if not os.path.exists(self.fname):
+            with open(self.fname, "w+") as writer:
+                writer.write("[[local|localrc]]\n")
+                writer.write("%s" % line)
+                return
+
+        def _do_set(writer, no_line):
+            writer.write("%s" % line)
+        self._at_insert_point_local(line, _do_set)
+
     def _at_insert_point(self, group, conf, section, name, func):
         temp = tempfile.NamedTemporaryFile(mode='r')
         shutil.copyfile(self.fname, temp.name)
@@ -301,9 +312,16 @@ class LocalConf(object):
         for group, conf in groups:
             if group == "local":
                 for line in lc._section(group, conf):
-                    m = re.match(r"(\w+)\s*\=\s*(.+)", line)
+                    if line.startswith('#'):
+                        continue
+                    m = re.match(r"([^#=\s]+)\s*\=\s*(.+)", line)
+
                     if m:
                         self.set_local(m.group(1), m.group(2))
+                    elif re.match("(enable|disable)", line):
+                        # special case appending enable* disable*
+                        # function lines
+                        self.set_local_raw(line)
                     else:
                         print("SKIPPING ``%s`` from '%s'" % (line.lstrip(), lcfile))
             else:
