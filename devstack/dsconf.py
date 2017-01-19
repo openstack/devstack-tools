@@ -323,7 +323,8 @@ class LocalConf(object):
                         # function lines
                         self.set_local_raw(line)
                     else:
-                        print("SKIPPING ``%s`` from '%s'" % (line.lstrip(), lcfile))
+                        print("SKIPPING ``%s`` from '%s'" %
+                              (line.lstrip(), lcfile))
             else:
                 for section, name, value in lc._conf(group, conf):
                     self.set(group, conf, section, name, value)
