@@ -48,6 +48,13 @@ global_physnet_mtu=1400
 compute = auto
 """
 
+LC2 = """
+[[local|localrc]]
+# some other comment
+enable_plugin ironic https://github.com/openstack/ironic
+TEMPEST_PLUGINS+=" /opt/stack/new/ironic"
+"""
+
 RESULT1 = """
 [[local|localrc]]
 a=5
@@ -61,6 +68,21 @@ global_physnet_mtu = 1400
 [upgrade_levels]
 compute = auto
 [[post-config|$GLANCE_CONF]]
+[upgrade_levels]
+compute = auto
+"""
+
+RESULT2 = """
+[[local|localrc]]
+a=b
+c=d
+f=1
+enable_plugin ironic https://github.com/openstack/ironic
+TEMPEST_PLUGINS+=" /opt/stack/new/ironic"
+[[post-config|$NEUTRON_CONF]]
+[DEFAULT]
+global_physnet_mtu=1450
+[[post-config|$NOVA_CONF]]
 [upgrade_levels]
 compute = auto
 """
@@ -86,3 +108,15 @@ class TestLcMerge(testtools.TestCase):
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT1)
+
+    def test_merge_lc2(self):
+        dirname = self.useFixture(fixtures.TempDir()).path
+        lc2 = os.path.join(dirname, "local2.conf")
+        with open(lc2, "w+") as f:
+            f.write(LC2)
+        conf = dsconf.LocalConf(self._path)
+        conf.merge_lc(lc2)
+
+        with open(self._path) as f:
+            content = f.read()
+            self.assertEqual(content, RESULT2)
