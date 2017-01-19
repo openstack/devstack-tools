@@ -46,6 +46,10 @@ def setlc(local_conf, args):
     local_conf.set_local(args.name, args.value)
 
 
+def setlc_raw(local_conf, args):
+    local_conf.set_raw(" ".join(args.items))
+
+
 def setlc_conf(local_conf, args):
     local_conf.set(args.group, args.conf, args.section, args.name, args.value)
 
@@ -115,8 +119,14 @@ def parse_args(argv):
     parser_setlc.add_argument('name')
     parser_setlc.add_argument('value')
 
+    parser_setlc_raw = subparsers.add_parser(
+        'setlc_raw', help='set raw line at the end of localrc in local.conf')
+    parser_setlc_raw.set_defaults(func=setlc_raw)
+    parser_setlc_raw.add_argument('local_conf')
+    parser_setlc_raw.add_argument('items', nargs="+")
+
     parser_setlc_conf = subparsers.add_parser(
-        'setlc_conf', help='set variable in localrc of local.conf')
+        'setlc_conf', help='set variable in ini section of local.conf')
     parser_setlc_conf.set_defaults(func=setlc_conf)
     parser_setlc_conf.add_argument('local_conf')
     parser_setlc_conf.add_argument('group')

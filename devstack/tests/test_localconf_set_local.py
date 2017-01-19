@@ -62,6 +62,21 @@ global_physnet_mtu=1450
 compute = auto
 """
 
+RESULT3 = """
+[[local|localrc]]
+a=b
+c=d
+f=1
+enable_plugin foo http://foo branch
+enable_plugin bar http://foo branch
+[[post-config|$NEUTRON_CONF]]
+[DEFAULT]
+global_physnet_mtu=1450
+[[post-config|$NOVA_CONF]]
+[upgrade_levels]
+compute = auto
+"""
+
 
 class TestLcSet(testtools.TestCase):
 
@@ -85,3 +100,11 @@ class TestLcSet(testtools.TestCase):
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT2)
+
+    def test_set_raw(self):
+        conf = dsconf.LocalConf(self._path)
+        conf.set_local_raw("enable_plugin foo http://foo branch")
+        conf.set_local_raw("enable_plugin bar http://foo branch")
+        with open(self._path) as f:
+            content = f.read()
+            self.assertEqual(content, RESULT3)
