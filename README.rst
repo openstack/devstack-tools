@@ -14,14 +14,14 @@ manipulating local.conf and ini files.
 ::
 
   usage: dsconf [-h]
-              {iniset,inicomment,iniuncomment,inirm,extract-localrc,extract,setlc,setlc_conf,merge_lc}
+              {iniset,inicomment,iniuncomment,inirm,extract-localrc,extract,setlc,setlc_raw,setlc_conf,merge_lc}
               ...
 
   optional arguments:
     -h, --help            show this help message and exit
 
   commands:
-    {iniset,inicomment,iniuncomment,inirm,extract-localrc,extract,setlc,setlc_conf,merge_lc}
+    {iniset,inicomment,iniuncomment,inirm,extract-localrc,extract,setlc,setlc_raw,setlc_conf,merge_lc}
                         sub-command help
     iniset              set item in ini file
     inicomment          comment item in ini file
@@ -30,7 +30,8 @@ manipulating local.conf and ini files.
     extract-localrc     extract localrc from local.conf
     extract             extract and merge config from local.conf
     setlc               set variable in localrc of local.conf
-    setlc_conf          set variable in localrc of local.conf
+    setlc_raw           set raw line at the end of localrc in local.conf
+    setlc_conf          set variable in ini section of local.conf
     merge_lc            merge local.conf files
 
 
