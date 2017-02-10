@@ -199,35 +199,15 @@ class LocalConf(object):
 
                     if re.match(re.escape("[[local|localrc]]"), line):
                         in_meta = True
-                        writer.write(line)
-                    elif re.match("\[\[.*\|.*\]\]", line):
-                        # if we're not done yet, we
-                        if in_meta:
-                            func(writer, None)
-                            writer.write(line)
-                            done = True
-                        in_meta = False
-                        continue
-                    elif re.match("\s*%s\s*\=" % re.escape(name), line):
-                        # we found our key, pass to the writer func
-                        func(writer, line)
+                    elif in_meta and re.match(re.escape("[["), line):
+                        func(writer, None)
                         done = True
-                    else:
-                        # write out whatever we find
-                        writer.write(line)
+                        in_meta = False
+
+                    # otherwise, just write what we found
+                    writer.write(line)
             if not done:
                 func(writer, None)
-
-    def set_local(self, name, value):
-        if not os.path.exists(self.fname):
-            with open(self.fname, "w+") as writer:
-                writer.write("[[local|localrc]]\n")
-                writer.write("%s=%s\n" % (name, value))
-                return
-
-        def _do_set(writer, line):
-            writer.write("%s=%s\n" % (name, value))
-        self._at_insert_point_local(name, _do_set)
 
     def set_local_raw(self, line):
         if not os.path.exists(self.fname):
@@ -312,19 +292,20 @@ class LocalConf(object):
         for group, conf in groups:
             if group == "local":
                 for line in lc._section(group, conf):
-                    if line.startswith('#'):
-                        continue
-                    m = re.match(r"([^#=\s]+)\s*\=\s*(.+)", line)
+                    self.set_local_raw(line)
+                    # if line.startswith('#'):
+                    #     continue
+                    # m = re.match(r"([^#=\s]+)\s*\=\s*(.+)", line)
 
-                    if m:
-                        self.set_local(m.group(1), m.group(2))
-                    elif re.match("(enable|disable)", line):
-                        # special case appending enable* disable*
-                        # function lines
-                        self.set_local_raw(line)
-                    else:
-                        print("SKIPPING ``%s`` from '%s'" %
-                              (line.lstrip(), lcfile))
+                    # if m:
+                    #     self.set_local(m.group(1), m.group(2))
+                    # elif re.match("(enable|disable)", line):
+                    #     # special case appending enable* disable*
+                    #     # function lines
+                    #     self.set_local_raw(line)
+                    # else:
+                    #     print("SKIPPING ``%s`` from '%s'" %
+                    #           (line.lstrip(), lcfile))
             else:
                 for section, name, value in lc._conf(group, conf):
                     self.set(group, conf, section, name, value)

@@ -51,9 +51,10 @@ compute = auto
 
 RESULT2 = """
 [[local|localrc]]
-a=2
+a=b
 c=d
 f=1
+a=2
 [[post-config|$NEUTRON_CONF]]
 [DEFAULT]
 global_physnet_mtu=1450
@@ -89,14 +90,14 @@ class TestLcSet(testtools.TestCase):
 
     def test_set_new(self):
         conf = dsconf.LocalConf(self._path)
-        conf.set_local("g", "2")
+        conf.set_local_raw("g=2")
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT1)
 
     def test_set_existing(self):
         conf = dsconf.LocalConf(self._path)
-        conf.set_local("a", "2")
+        conf.set_local_raw("a=2")
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT2)

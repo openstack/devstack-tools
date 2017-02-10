@@ -57,9 +57,10 @@ TEMPEST_PLUGINS+=" /opt/stack/new/ironic"
 
 RESULT1 = """
 [[local|localrc]]
-a=5
+a=b
 c=d
 f=1
+a=5
 g=2
 [[post-config|$NEUTRON_CONF]]
 [DEFAULT]
@@ -77,6 +78,7 @@ RESULT2 = """
 a=b
 c=d
 f=1
+# some other comment
 enable_plugin ironic https://github.com/openstack/ironic
 TEMPEST_PLUGINS+=" /opt/stack/new/ironic"
 [[post-config|$NEUTRON_CONF]]
