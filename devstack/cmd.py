@@ -43,11 +43,11 @@ def extract_config(local_conf, args):
 
 
 def setlc(local_conf, args):
-    local_conf.set_local(args.name, args.value)
+    local_conf.set_local("%s=%s" % (args.name, args.value))
 
 
 def setlc_raw(local_conf, args):
-    local_conf.set_raw(" ".join(args.items))
+    local_conf.set_local(" ".join(args.items))
 
 
 def setlc_conf(local_conf, args):

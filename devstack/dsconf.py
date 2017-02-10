@@ -209,7 +209,7 @@ class LocalConf(object):
             if not done:
                 func(writer, None)
 
-    def set_local_raw(self, line):
+    def set_local(self, line):
         if not os.path.exists(self.fname):
             with open(self.fname, "w+") as writer:
                 writer.write("[[local|localrc]]\n")
@@ -292,20 +292,7 @@ class LocalConf(object):
         for group, conf in groups:
             if group == "local":
                 for line in lc._section(group, conf):
-                    self.set_local_raw(line)
-                    # if line.startswith('#'):
-                    #     continue
-                    # m = re.match(r"([^#=\s]+)\s*\=\s*(.+)", line)
-
-                    # if m:
-                    #     self.set_local(m.group(1), m.group(2))
-                    # elif re.match("(enable|disable)", line):
-                    #     # special case appending enable* disable*
-                    #     # function lines
-                    #     self.set_local_raw(line)
-                    # else:
-                    #     print("SKIPPING ``%s`` from '%s'" %
-                    #           (line.lstrip(), lcfile))
+                    self.set_local(line)
             else:
                 for section, name, value in lc._conf(group, conf):
                     self.set(group, conf, section, name, value)

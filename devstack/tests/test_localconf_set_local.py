@@ -90,22 +90,22 @@ class TestLcSet(testtools.TestCase):
 
     def test_set_new(self):
         conf = dsconf.LocalConf(self._path)
-        conf.set_local_raw("g=2")
+        conf.set_local("g=2")
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT1)
 
     def test_set_existing(self):
         conf = dsconf.LocalConf(self._path)
-        conf.set_local_raw("a=2")
+        conf.set_local("a=2")
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT2)
 
     def test_set_raw(self):
         conf = dsconf.LocalConf(self._path)
-        conf.set_local_raw("enable_plugin foo http://foo branch")
-        conf.set_local_raw("enable_plugin bar http://foo branch")
+        conf.set_local("enable_plugin foo http://foo branch")
+        conf.set_local("enable_plugin bar http://foo branch")
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT3)
