@@ -16,4 +16,4 @@ import pbr.version
 
 
 __version__ = pbr.version.VersionInfo(
-    'devstack').version_string()
+    'devstack-tools').version_string()
