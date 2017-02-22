@@ -109,3 +109,11 @@ class TestLcSet(testtools.TestCase):
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT3)
+
+    def test_set_raw_multiline(self):
+        conf = dsconf.LocalConf(self._path)
+        conf.set_local("enable_plugin foo http://foo branch"
+                       "\nenable_plugin bar http://foo branch")
+        with open(self._path) as f:
+            content = f.read()
+            self.assertEqual(content, RESULT3)
