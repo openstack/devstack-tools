@@ -175,6 +175,12 @@ class LocalConf(object):
                 if in_section:
                     yield line
 
+    def _has_local_section(self):
+        for group in self.groups():
+            if group == ("local", "localrc"):
+                return True
+        return False
+
     def extract(self, group, conf, target):
         ini_file = IniFile(target)
         for section, name, value in self._conf(group, conf):
@@ -186,9 +192,28 @@ class LocalConf(object):
                 f.write(line)
 
     def _at_insert_point_local(self, name, func):
+        """Run function when we are at the right insertion point in file.
+
+        This lets us process an arbitrary file and insert content at
+        the correct point. It has a few different state flags that we
+        are looking for.
+
+        Does this file have a local section at all? If not, we need to
+        write one early in the file (this means we work with an empty
+        file, as well as a file that has only post-config sections.
+
+        Are we currently in a local section, if so, we need to write
+        out content to the end, because items added to local always
+        have to be added at the end.
+
+        Did we write out the work that we expected? If so, just blast
+        all lines to the end of the file.
+
+        """
         temp = tempfile.NamedTemporaryFile(mode='r')
         shutil.copyfile(self.fname, temp.name)
-        in_meta = False
+        in_local = False
+        has_local = self._has_local_section()
         done = False
         with open(self.fname, "w+") as writer:
             with open(temp.name) as reader:
@@ -198,11 +223,17 @@ class LocalConf(object):
                         continue
 
                     if re.match(re.escape("[[local|localrc]]"), line):
-                        in_meta = True
-                    elif in_meta and re.match(re.escape("[["), line):
+                        in_local = True
+                    elif in_local and re.match(re.escape("[["), line):
                         func(writer, None)
                         done = True
-                        in_meta = False
+                        in_local = False
+                    elif not has_local and re.match(re.escape("[["), line):
+                        writer.write("[[local|localrc]]\n")
+                        func(writer, None)
+                        done = True
+                        in_local = False
+                        has_local = True
 
                     # otherwise, just write what we found
                     writer.write(line)

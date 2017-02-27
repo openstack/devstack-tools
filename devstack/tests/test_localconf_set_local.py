@@ -35,6 +35,15 @@ global_physnet_mtu=1450
 compute = auto
 """
 
+BASIC_NO_LOCAL = """
+[[post-config|$NEUTRON_CONF]]
+[DEFAULT]
+global_physnet_mtu=1450
+[[post-config|$NOVA_CONF]]
+[upgrade_levels]
+compute = auto
+"""
+
 RESULT1 = """
 [[local|localrc]]
 a=b
@@ -70,6 +79,18 @@ c=d
 f=1
 enable_plugin foo http://foo branch
 enable_plugin bar http://foo branch
+[[post-config|$NEUTRON_CONF]]
+[DEFAULT]
+global_physnet_mtu=1450
+[[post-config|$NOVA_CONF]]
+[upgrade_levels]
+compute = auto
+"""
+
+RESULT_NO_LOCAL = """
+[[local|localrc]]
+a=b
+c=d
 [[post-config|$NEUTRON_CONF]]
 [DEFAULT]
 global_physnet_mtu=1450
@@ -117,3 +138,21 @@ class TestLcSet(testtools.TestCase):
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT3)
+
+
+class TestNoLocal(testtools.TestCase):
+
+    def setUp(self):
+        super(TestNoLocal, self).setUp()
+        self._path = self.useFixture(fixtures.TempDir()).path
+        self._path += "/local.conf"
+        with open(self._path, "w") as f:
+            f.write(BASIC_NO_LOCAL)
+
+    def test_set_new(self):
+        conf = dsconf.LocalConf(self._path)
+        conf.set_local("a=b")
+        conf.set_local("c=d")
+        with open(self._path) as f:
+            content = f.read()
+            self.assertEqual(content, RESULT_NO_LOCAL)
