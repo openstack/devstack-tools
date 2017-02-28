@@ -300,9 +300,11 @@ class LocalConf(object):
                         # write out whatever we find
                         writer.write(line)
             if not done:
-                # we never found meta with a relevant section
-                writer.write("[[%s|%s]]\n" % (group, conf))
-                writer.write("[%s]\n" % (section))
+                if not in_meta:
+                    writer.write("[[%s|%s]]\n" % (group, conf))
+                    in_section = False
+                if not in_section:
+                    writer.write("[%s]\n" % (section))
                 func(writer, None)
 
     def set(self, group, conf, section, name, value):

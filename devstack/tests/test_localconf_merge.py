@@ -36,6 +36,16 @@ global_physnet_mtu=1450
 compute = auto
 """
 
+BASIC2 = """
+[[local|localrc]]
+a=b
+c=d
+f=1
+[[post-config|$NEUTRON_CONF]]
+[quotas]
+quota_network = 100
+"""
+
 LC1 = """
 [[local|localrc]]
 a=5
@@ -53,6 +63,18 @@ LC2 = """
 # some other comment
 enable_plugin ironic https://github.com/openstack/ironic
 TEMPEST_PLUGINS+=" /opt/stack/new/ironic"
+"""
+
+LC3 = """
+[[post-config|$NEUTRON_CONF]]
+[quotas]
+quota_port = 500
+"""
+
+LC4 = """
+[[post-config|$NEUTRON_CONF]]
+[DEFAULT]
+global_physnet_mtu=1400
 """
 
 RESULT1 = """
@@ -89,6 +111,29 @@ global_physnet_mtu=1450
 compute = auto
 """
 
+RESULT3 = """
+[[local|localrc]]
+a=b
+c=d
+f=1
+[[post-config|$NEUTRON_CONF]]
+[quotas]
+quota_network = 100
+quota_port = 500
+"""
+
+RESULT4 = """
+[[local|localrc]]
+a=b
+c=d
+f=1
+[[post-config|$NEUTRON_CONF]]
+[quotas]
+quota_network = 100
+[DEFAULT]
+global_physnet_mtu = 1400
+"""
+
 
 class TestLcMerge(testtools.TestCase):
 
@@ -122,3 +167,41 @@ class TestLcMerge(testtools.TestCase):
         with open(self._path) as f:
             content = f.read()
             self.assertEqual(content, RESULT2)
+
+
+class TestLcMergePost(testtools.TestCase):
+
+    def setUp(self):
+        super(TestLcMergePost, self).setUp()
+        self._path = self.useFixture(fixtures.TempDir()).path
+        self._path += "/local.conf"
+        with open(self._path, "w") as f:
+            f.write(BASIC2)
+
+    def test_merge_lc3(self):
+        """Test merging with 2 post-config sections that should overlap."""
+
+        dirname = self.useFixture(fixtures.TempDir()).path
+        lc = os.path.join(dirname, "local.conf")
+        with open(lc, "w+") as f:
+            f.write(LC3)
+        conf = dsconf.LocalConf(self._path)
+        conf.merge_lc(lc)
+
+        with open(self._path) as f:
+            content = f.read()
+            self.assertEqual(content, RESULT3)
+
+    def test_merge_lc4(self):
+        """Test merging with 2 post-config sections that should overlap."""
+
+        dirname = self.useFixture(fixtures.TempDir()).path
+        lc = os.path.join(dirname, "local2.conf")
+        with open(lc, "w+") as f:
+            f.write(LC4)
+        conf = dsconf.LocalConf(self._path)
+        conf.merge_lc(lc)
+
+        with open(self._path) as f:
+            content = f.read()
+            self.assertEqual(content, RESULT4)
