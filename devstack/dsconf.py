@@ -37,11 +37,11 @@ class IniFile(object):
 
         with open(self.fname, "r+") as reader:
             for line in reader.readlines():
-                m = re.match("\[([^\[\]]+)\]", line)
+                m = re.match(r"\[([^\[\]]+)\]", line)
                 if m:
                     current_section = m.group(1)
                 if current_section == section:
-                    if re.match("%s\s*\=" % name, line):
+                    if re.match(r"%s\s*\=" % name, line):
                         return True
         return False
 
@@ -64,7 +64,7 @@ class IniFile(object):
             with open(temp.name) as reader:
                 for line in reader.readlines():
                     writer.write(line)
-                    m = re.match("\[([^\[\]]+)\]", line)
+                    m = re.match(r"\[([^\[\]]+)\]", line)
                     if m and m.group(1) == section:
                         found = True
                         writer.write("%s = %s\n" % (name, value))
@@ -72,7 +72,7 @@ class IniFile(object):
                 writer.write("[%s]\n" % section)
                 writer.write("%s = %s\n" % (name, value))
 
-    def _at_existing_key(self, section, name, func, match="%s\s*\="):
+    def _at_existing_key(self, section, name, func, match=r"%s\s*\="):
         """Run a function at a found key.
 
         NOTE(sdague): if the file isn't found, we end up
@@ -86,7 +86,7 @@ class IniFile(object):
         with open(temp.name) as reader:
             with open(self.fname, "w+") as writer:
                 for line in reader.readlines():
-                    m = re.match("\[([^\[\]]+)\]", line)
+                    m = re.match(r"\[([^\[\]]+)\]", line)
                     if m:
                         current_section = m.group(1)
                     if current_section == section:
@@ -113,10 +113,10 @@ class IniFile(object):
 
     def uncomment(self, section, name):
         def _do_uncomment(writer, line):
-            writer.write(re.sub("^#\s*", "", line))
+            writer.write(re.sub(r"^#\s*", "", line))
 
         self._at_existing_key(section, name, _do_uncomment,
-                              match="#\s*%s\s*\=")
+                              match=r"#\s*%s\s*\=")
 
     def set(self, section, name, value):
         def _do_set(writer, line):
@@ -136,7 +136,7 @@ class LocalConf(object):
     def _conf(self, group, conf):
         current_section = ""
         for line in self._section(group, conf):
-            m = re.match("\[([^\[\]]+)\]", line)
+            m = re.match(r"\[([^\[\]]+)\]", line)
             if m:
                 current_section = m.group(1)
                 continue
@@ -169,7 +169,7 @@ class LocalConf(object):
                     continue
                 # any other meta section means we aren't in the
                 # section we want to be.
-                elif re.match("\[\[.*\|.*\]\]", line):
+                elif re.match(r"\[\[.*\|.*\]\]", line):
                     in_section = False
                     continue
                 if in_section:
@@ -267,7 +267,7 @@ class LocalConf(object):
                     if re.match(re.escape("[[%s|%s]]" % (group, conf)), line):
                         in_meta = True
                         writer.write(line)
-                    elif re.match("\[\[.*\|.*\]\]", line):
+                    elif re.match(r"\[\[.*\|.*\]\]", line):
                         # if we're not done yet, we
                         if in_meta:
                             if not in_section:
@@ -283,7 +283,7 @@ class LocalConf(object):
                         # we found a relevant section
                         writer.write(line)
                         in_section = True
-                    elif re.match("\[[^\[\]]+\]", line):
+                    elif re.match(r"\[[^\[\]]+\]", line):
                         if in_meta and in_section:
                             # We've ended our section, in our meta,
                             # never found the key. Time to add it.
@@ -292,7 +292,7 @@ class LocalConf(object):
                         in_section = False
                         writer.write(line)
                     elif (in_meta and in_section and
-                          re.match("\s*%s\s*\=" % re.escape(name), line)):
+                          re.match(r"\s*%s\s*\=" % re.escape(name), line)):
                         # we found our match point
                         func(writer, line)
                         done = True
