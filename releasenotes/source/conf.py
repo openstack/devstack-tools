@@ -42,6 +42,12 @@ extensions = [
     'reno.sphinxext',
 ]
 
+# openstackdocstheme options
+openstackdocs_repo_name = 'openstack/devstack-tools'
+openstackdocs_bug_project = 'devstack-tools'
+openstackdocs_bug_tag = 'doc'
+openstackdocs_auto_name = False
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -55,7 +61,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'devstack Release Notes'
+project = u'devstack-tools Release Notes'
 copyright = u'2016, OpenStack Foundation'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -98,7 +104,7 @@ exclude_patterns = []
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []

@@ -31,9 +31,9 @@ extensions = ['sphinx.ext.autodoc',
              ]
 
 # openstackdocstheme options
-repository_name = 'openstack/devstack-tools'
-bug_project = 'devstack-tools'
-bug_tag = 'doc'
+openstackdocs_repo_name = 'openstack/devstack-tools'
+openstackdocs_bug_project = 'devstack-tools'
+openstackdocs_bug_tag = 'doc'
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
@@ -46,7 +46,6 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'devstack-tools'
 copyright = u'2016, OpenStack Foundation'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
@@ -57,7 +56,7 @@ add_function_parentheses = True
 add_module_names = True
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # -- Options for HTML output ---------------------------------------------------
 
