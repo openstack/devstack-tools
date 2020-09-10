@@ -34,6 +34,7 @@ extensions = ['sphinx.ext.autodoc',
 openstackdocs_repo_name = 'openstack/devstack-tools'
 openstackdocs_bug_project = 'devstack-tools'
 openstackdocs_bug_tag = 'doc'
+openstackdocs_pdf_link = True
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
@@ -141,9 +142,12 @@ suppress_warnings = ['image.nonlocal_uri']
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
-    ('index', 'doc-tempest.tex', u'Tempest Testing Project',
+    ('index', 'doc-devstack-tools.tex', u'Devstack-tools Documentation',
      u'OpenStack Foundation', 'manual'),
 ]
 
 # Disable usage of xindy https://bugzilla.redhat.com/show_bug.cgi?id=1643664
 latex_use_xindy = False
+latex_elements = {
+    'extraclassoptions': 'openany,oneside',
+}

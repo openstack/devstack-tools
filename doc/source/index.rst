@@ -6,8 +6,6 @@
 Welcome to devstack-tools's documentation!
 ========================================================
 
-Contents:
-
 .. toctree::
    :maxdepth: 2
 
