@@ -36,9 +36,9 @@ manipulating local.conf and ini files.
 
 
 * Free software: Apache license
-* Documentation: http://docs.openstack.org/developer/devstack-tools
-* Source: http://git.openstack.org/cgit/openstack/devstack-tools
-* Bugs: http://bugs.launchpad.net/replace with the name of the project on launchpad
+* Documentation: https://docs.openstack.org/devstack-tools/latest/
+* Source: https://opendev.org/openstack/devstack-tools/
+* Bugs: https://bugs.launchpad.net/devstack
 
 Features
 --------
