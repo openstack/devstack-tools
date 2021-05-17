@@ -47,7 +47,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-copyright = u'2016, OpenStack Foundation'
+copyright = '2016, OpenStack Foundation'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
@@ -142,8 +142,8 @@ suppress_warnings = ['image.nonlocal_uri']
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
-    ('index', 'doc-devstack-tools.tex', u'Devstack-tools Documentation',
-     u'OpenStack Foundation', 'manual'),
+    ('index', 'doc-devstack-tools.tex', 'Devstack-tools Documentation',
+     'OpenStack Foundation', 'manual'),
 ]
 
 # Disable usage of xindy https://bugzilla.redhat.com/show_bug.cgi?id=1643664
