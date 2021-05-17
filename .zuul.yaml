@@ -2,3 +2,4 @@
     templates:
       - openstack-python3-xena-jobs
       - publish-openstack-docs-pti
+      - openstack-cover-jobs
